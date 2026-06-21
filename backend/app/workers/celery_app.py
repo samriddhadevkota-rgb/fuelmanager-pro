@@ -29,6 +29,7 @@ celery_app.conf.update(
     worker_prefetch_multiplier=1,
     task_max_retries=3,
     task_default_retry_delay=60,
+    broker_connection_retry_on_startup=True,
     task_routes={
         "app.workers.tasks.invoice_tasks.*": {"queue": "invoices"},
         "app.workers.tasks.email_tasks.*": {"queue": "emails"},
