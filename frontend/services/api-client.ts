@@ -68,11 +68,13 @@ class ApiClient {
   setTokens(accessToken: string, refreshToken: string): void {
     localStorage.setItem("access_token", accessToken);
     localStorage.setItem("refresh_token", refreshToken);
+    document.cookie = `fuel_session=1; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
   }
 
   clearTokens(): void {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
+    document.cookie = "fuel_session=; path=/; max-age=0";
   }
 
   async get<T>(url: string, params?: Record<string, unknown>): Promise<T> {
