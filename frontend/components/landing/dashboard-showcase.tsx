@@ -29,7 +29,7 @@ function BarGraph() {
   );
 }
 
-function MetricRow({ icon: Icon, label, value, color, delta }: { icon: React.ElementType; label: string; value: string; color: string; delta?: string }) {
+function MetricRow({ icon: Icon, label, value, color, delta }: { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; label: string; value: string; color: string; delta?: string }) {
   return (
     <div className="flex items-center justify-between py-2.5 border-b border-white/5 last:border-0">
       <div className="flex items-center gap-3">

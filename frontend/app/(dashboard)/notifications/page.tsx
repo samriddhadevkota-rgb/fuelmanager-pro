@@ -12,7 +12,7 @@ import { containerVariants, itemVariants, pageVariants } from "@/lib/animations"
 import { formatRelativeTime } from "@/lib/formatters";
 import { useState } from "react";
 
-const TYPE_ICON: Record<string, React.ElementType> = {
+const TYPE_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
   info: Info,
   warning: AlertTriangle,
   success: CheckCircle2,

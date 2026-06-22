@@ -24,7 +24,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function Section({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) {
+function Section({ icon: Icon, title, children }: { icon: React.ComponentType<{ className?: string }>; title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-xl border border-border bg-card p-6 space-y-5">
       <div className="flex items-center gap-2.5 pb-2 border-b border-border">

@@ -1,5 +1,5 @@
-import { LandingPage } from "@/components/landing/landing-page";
+import { CinemaPage } from "@/components/cinema/cinema-page";
 
 export default function RootPage() {
-  return <LandingPage />;
+  return <CinemaPage />;
 }
