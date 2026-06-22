@@ -20,7 +20,7 @@ export function ParticleCanvas() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d")!;
     let animId: number;
-    let particles: Particle[] = [];
+    const particles: Particle[] = [];
     const COUNT = 110;
 
     function resize() {

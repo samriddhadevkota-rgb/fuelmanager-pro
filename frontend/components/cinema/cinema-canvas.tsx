@@ -350,11 +350,9 @@ function FuelParticles({ scrollRef }: { scrollRef: RefObject<number> }) {
     const t = clock.getElapsedTime();
     data.forEach((d, i) => {
       const cy = ((d.offset + t * 1.4) % 1); // 0-1 fall progress
-      // Start at hose nozzle: above truck fill port
-      const worldZ = -13 + lp(-18, -18, 1); // at station z
       dummy.position.set(
         0.4 + d.xr,
-        0.8 - cy * 1.4, // falls from 0.8 to -0.6
+        0.8 - cy * 1.4,
         -15 + d.zr
       );
       dummy.scale.setScalar(lp(0.06, 0.02, cy));
@@ -381,7 +379,7 @@ function FuelParticles({ scrollRef }: { scrollRef: RefObject<number> }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // ENERGY PARTICLES (atmospheric GPU particles)
 // ─────────────────────────────────────────────────────────────────────────────
-function EnergyParticles({ scrollRef }: { scrollRef: RefObject<number> }) {
+function EnergyParticles({ scrollRef: _scrollRef }: { scrollRef: RefObject<number> }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const COUNT = 1200;
@@ -396,9 +394,7 @@ function EnergyParticles({ scrollRef }: { scrollRef: RefObject<number> }) {
     color: Math.floor(Math.random() * 4),
   })), []);
 
-  const colors = ["#6366f1","#8b5cf6","#60a5fa","#34d399"];
-
-  const colorMats = useMemo(() => colors.map(c => new THREE.MeshStandardMaterial({
+  const colorMats = useMemo(() => ["#6366f1","#8b5cf6","#60a5fa","#34d399"].map(c => new THREE.MeshStandardMaterial({
     color: c, emissive: new THREE.Color(c), emissiveIntensity: 0.8, transparent: true, opacity: 0.7,
   })), []);
 
@@ -554,7 +550,7 @@ function DashboardCards3D({ scrollRef }: { scrollRef: RefObject<number> }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // ROAD + GROUND
 // ─────────────────────────────────────────────────────────────────────────────
-function Ground({ scrollRef }: { scrollRef: RefObject<number> }) {
+function Ground({ scrollRef: _scrollRef }: { scrollRef: RefObject<number> }) {
   const roadMat = useMemo(() => new THREE.MeshStandardMaterial({
     color: "#0e0e1c", roughness: 0.88, metalness: 0.12,
   }), []);
