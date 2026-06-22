@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-lint-test:
+    name: Backend — Lint & Test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: fuel_test
+          POSTGRES_USER: fuel_user
+          POSTGRES_PASSWORD: fuel_pass
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt
+
+      - name: Lint with Ruff
+        working-directory: backend
+        run: ruff check app/ --output-format=github
+
+      - name: Type check with Mypy
+        working-directory: backend
+        run: mypy app/ --ignore-missing-imports
+        continue-on-error: true
+
+      - name: Run tests
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql+asyncpg://fuel_user:fuel_pass@localhost:5432/fuel_test
+          DATABASE_URL_SYNC: postgresql://fuel_user:fuel_pass@localhost:5432/fuel_test
+          REDIS_URL: redis://localhost:6379/0
+          JWT_SECRET_KEY: test-secret-key-ci
+          SECRET_KEY: test-secret-key-ci
+          RABBITMQ_URL: amqp://guest:guest@localhost:5672/
+        run: |
+          pytest tests/ -v --cov=app --cov-report=xml --cov-report=term-missing
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: backend/coverage.xml
+          flags: backend
+
+  frontend-lint-typecheck:
+    name: Frontend — Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Type check
+        working-directory: frontend
+        run: npm run type-check
+
+      - name: Lint
+        working-directory: frontend
+        run: npm run lint
+
+  docker-build:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    needs: [backend-lint-test, frontend-lint-typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build backend image
+        run: docker build -t fuelmanager-backend ./backend
+      - name: Build frontend image
+        run: docker build -t fuelmanager-frontend ./frontend
+      - name: Build nginx image
+        run: docker build -t fuelmanager-nginx ./nginx
