@@ -49,9 +49,13 @@ async def list_expenses(
             "expense_date": str(e.expense_date),
             "vendor": e.vendor,
             "payment_method": e.payment_method,
+            "reference_number": e.reference_number,
+            "notes": e.notes,
             "is_recurring": e.is_recurring,
             "status": e.status,
+            "is_active": e.is_active,
             "created_at": e.created_at.isoformat(),
+            "updated_at": e.updated_at.isoformat(),
         }
         for e in items
     ]

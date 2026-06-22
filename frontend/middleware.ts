@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/register", "/forgot-password"];
+// Accessible without logging in
+const PUBLIC_PATHS = ["/", "/login", "/register", "/forgot-password"];
+// Logged-in users don't need these — send them to the app
+const AUTH_REDIRECT_PATHS = ["/login", "/register", "/forgot-password"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -11,13 +14,19 @@ export function middleware(request: NextRequest) {
     (p) => pathname === p || pathname.startsWith(p + "/")
   );
 
+  // Unauthenticated user trying to access a protected page → login
   if (!isAuthenticated && !isPublicPath) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isAuthenticated && isPublicPath) {
+  // Authenticated user on login/register/forgot-password → dashboard
+  // Note: "/" (landing page) is intentionally NOT in this list — anyone can view it
+  const isAuthPage = AUTH_REDIRECT_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(p + "/")
+  );
+  if (isAuthenticated && isAuthPage) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

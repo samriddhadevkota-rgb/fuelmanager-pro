@@ -36,6 +36,7 @@ class BaseRepository(Generic[ModelT]):
         sort_order: str = "desc",
         search_column: str | None = None,
         search_term: str | None = None,
+        search_columns: list[str] | None = None,
     ) -> tuple[list[ModelT], int]:
         base_stmt = select(self.model).where(
             self.model.company_id == company_id,
@@ -47,9 +48,14 @@ class BaseRepository(Generic[ModelT]):
                 if value is not None and hasattr(self.model, key):
                     base_stmt = base_stmt.where(getattr(self.model, key) == value)
 
-        if search_term and search_column and hasattr(self.model, search_column):
-            col = getattr(self.model, search_column)
-            base_stmt = base_stmt.where(col.ilike(f"%{search_term}%"))
+        if search_term:
+            cols = search_columns or ([search_column] if search_column else [])
+            valid_cols = [c for c in cols if c and hasattr(self.model, c)]
+            if valid_cols:
+                from sqlalchemy import or_
+                base_stmt = base_stmt.where(
+                    or_(*[getattr(self.model, c).ilike(f"%{search_term}%") for c in valid_cols])
+                )
 
         count_stmt = select(func.count()).select_from(base_stmt.subquery())
         total_result = await self.session.execute(count_stmt)
